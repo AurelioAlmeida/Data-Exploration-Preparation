@@ -2,6 +2,8 @@ setwd("C:/Users/AurelioAlmeida/Documents/GitHub/Data-Exploration-Preparation")
 
 library(readr)
 library(visdat)
+library(caret)
+library(zoo)
 
 # Load the dataset
 Global_Covid_Dataset_ <- read.csv("C:/Users/AurelioAlmeida/Documents/GitHub/Data-Exploration-Preparation/Global Covid Dataset .csv")
@@ -196,7 +198,80 @@ print(max_biweekly_deaths)
 print(sd_biweekly_deaths)
 
 
+###start of letter C
+
+##Handling missing values before perform scaling methods
+
+# Interpolate missing values of "new_cases" variable
+eu_dataset$new_cases <- na.approx(eu_dataset$new_cases, na.rm = FALSE)
 
 
+##Min-Max Normalization
+
+# Extract the variable
+new_cases <- eu_dataset$new_cases
+
+# Function to apply Min-Max Normalization
+min_max_normalize <- function(x) {
+  return((x - min(x)) / (max(x) - min(x)))
+}
+
+# Apply Min-Max Normalization
+new_cases_min_max <- min_max_normalize(new_cases)
+
+# Summary Statistics - Before Scaling
+summary_before <- summary(eu_dataset$new_cases)
+
+# Summary Statistics - Min-Max Normalization
+summary_min_max <- summary(new_cases_min_max)
+
+# Print values
+cat("Summary Statistics - Before Scaling:\n")
+cat(paste(names(summary_before), ": ", summary_before, sep="\n"), "\n")
+
+cat("\nSummary Statistics - Min-Max Normalization:\n")
+cat(paste(names(summary_min_max), ": ", summary_min_max, sep="\n"), "\n")
+
+## Z-score Standardization
+
+# Function to apply Z-score Standardization
+z_score_standardize <- function(x) {
+  return((x - mean(x)) / sd(x))
+}
+
+# Extract the variable
+new_cases <- eu_dataset$new_cases
+
+# Apply Z-score Standardization
+new_cases_z_score <- z_score_standardize(new_cases)
+
+# Summary Statistics - Z-score Standardization
+summary_z_score <- summary(new_cases_z_score)
+
+# Print values
+cat("\nSummary Statistics - Z-score Standardization:\n")
+cat(paste(names(summary_z_score), ": ", summary_z_score, sep="\n"), "\n")
+
+###Robust scalar
+
+# Extract the variable
+new_cases <- eu_dataset$new_cases
+
+# Function to apply Robust Scaling
+robust_scale <- function(x) {
+  return((x - median(x)) / IQR(x))
+}
+
+# Apply Robust Scaling
+new_cases_robust <- robust_scale(new_cases)
+
+# Summary Statistics - Robust Scaling
+summary_robust <- summary(new_cases_robust)
+
+# Print values
+cat("\nSummary Statistics - Robust Scaling:\n")
+cat(paste(names(summary_robust), ": ", summary_robust, sep="\n"), "\n")
+
+##Continue with next variable
 
 
