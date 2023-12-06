@@ -5,6 +5,7 @@ library(visdat)
 library(caret)
 library(zoo)
 library(imputeTS)
+library(ggplot2)
 
 # Load the dataset
 Global_Covid_Dataset_ <- read.csv("C:/Users/AurelioAlmeida/Documents/GitHub/Data-Exploration-Preparation/Global Covid Dataset .csv")
@@ -275,6 +276,61 @@ cat(paste(names(summary_robust), ": ", summary_robust, sep="\n"), "\n")
 
 #start letter D
 
+##Plot line
+
+# Make sure the 'date' column is in the correct date format
+eu_dataset$date <- lubridate::mdy(eu_dataset$date)
+
+# Remove rows with missing values in 'total_cases', 'total_deaths', 'location', and 'date'
+eu_dataset <- na.omit(eu_dataset[c("date", "total_cases", "total_deaths", "location")])
 
 
+# Select the top 5 countries with the highest total cases
+top_countries <- eu_dataset %>%
+  group_by(location) %>%
+  summarize(max_total_cases = max(total_cases)) %>%
+  arrange(desc(max_total_cases)) %>%
+  head(5)
+
+# Filter the dataset for the top 5 countries
+top_countries_data <- eu_dataset %>%
+  filter(location %in% top_countries$location)
+
+# Create a line plot for total cases and total deaths by location
+ggplot(top_countries_data, aes(x = date, y = total_cases, group = location, color = location)) +
+  geom_line(aes(y = total_deaths)) +
+  labs(title = "Line Plot of Total Cases Over Time of the 5 Countries with the Highest Total Cases", x = "Date", y = "Total of Cases") +
+  theme_minimal()
+
+##Heatmaps
+
+# Make sure the 'date' column is in the correct date format
+eu_dataset$date <- lubridate::mdy(eu_dataset$date)
+
+# Remove rows with missing values in 'total_cases', 'total_deaths', 'location', and 'date'
+eu_dataset <- na.omit(eu_dataset[c("date", "total_cases", "total_deaths", "location")])
+
+# Select the top 5 countries with the highest total cases
+top_countries <- eu_dataset %>%
+  group_by(location) %>%
+  summarize(max_total_cases = max(total_cases)) %>%
+  arrange(desc(max_total_cases)) %>%
+  head(5)
+
+# Filter the dataset for the top 5 countries
+top_countries_data <- eu_dataset %>%
+  filter(location %in% top_countries$location)
+
+# Create a heatmap for total cases of the top 5 countries over time
+ggplot(top_countries_data, aes(x = as.factor(year(date)), y = location, fill = total_cases)) +
+  geom_tile(color = "white", size = 0.2) +  # Add white borders for better separation
+  scale_fill_viridis_c(option = "magma", na.value = "white") +  # Adjust color scale to magma
+  labs(title = "Heatmap of Total Cases Over Time for top 5 countries with the highest total cases",
+       x = "Year",
+       y = "Country",
+       fill = "Total Cases") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1),  # Keep x-axis labels straight
+        legend.position = "right") +  # Adjust legend position
+  scale_fill_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"))  # Use label_number to format as millions
 
