@@ -334,3 +334,26 @@ ggplot(top_countries_data, aes(x = as.factor(year(date)), y = location, fill = t
         legend.position = "right") +  # Adjust legend position
   scale_fill_continuous(labels = scales::label_number(scale = 1e-6, suffix = "M"))  # Use label_number to format as millions
 
+##Scatter plot
+
+# Install and load the necessary library if not already installed
+if (!require(ggplot2)) {
+  install.packages("ggplot2")
+}
+library(ggplot2)
+
+# Select the top 5 countries with the highest total cases
+top_countries <- names(sort(tapply(eu_dataset$total_cases, eu_dataset$location, max), decreasing = TRUE)[1:5])
+
+# Convert date to Date type if it's not already
+eu_dataset$date <- as.Date(eu_dataset$date)
+
+# Plot scatter plots for each of the top 5 countries with numeric format for total cases
+ggplot(subset(eu_dataset, location %in% top_countries), aes(x = date, y = total_cases, color = location)) +
+  geom_point() +
+  labs(title = 'Scatter plot of Total Cases Over Time for top 5 countries with the highest total cases',
+       x = 'Date',
+       y = 'Total Cases (in Millions)') +
+  theme_minimal() +
+  scale_y_continuous(labels = scales::number_format(scale = 1e-6, suffix = "M"))
+
